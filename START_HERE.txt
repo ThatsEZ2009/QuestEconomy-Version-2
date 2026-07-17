@@ -1,0 +1,3 @@
+QuestEconomy — clean full project (v1.1.0, Pass 2).
+Everything is at the top level here: pom.xml, src, resourcepack, .github
+Upload the WHOLE thing to a FRESH empty GitHub repo (see chat for steps).

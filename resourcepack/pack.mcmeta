@@ -1,0 +1,7 @@
+{
+  "pack": {
+    "description": "QuestEconomy Coins — copper, silver, gold, diamond",
+    "pack_format": 84,
+    "supported_formats": { "min_inclusive": 84, "max_inclusive": 200 }
+  }
+}

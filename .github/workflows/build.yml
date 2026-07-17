@@ -1,0 +1,58 @@
+name: Build QuestEconomy
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      - name: Show where things are (debug)
+        run: |
+          echo "Files named pom.xml or pack.mcmeta:"
+          find . -name pom.xml -o -name pack.mcmeta
+
+      - name: Build the plugin jar
+        run: |
+          POM=$(find . -name pom.xml -not -path '*/target/*' -printf '%d %p\n' | sort -n | head -1 | cut -d' ' -f2-)
+          echo "Building with POM: $POM"
+          mvn -B -U -f "$POM" clean package
+
+      - name: Zip the resource pack
+        run: |
+          MCMETA=$(find . -name pack.mcmeta -printf '%d %p\n' | sort -n | head -1 | cut -d' ' -f2-)
+          RP_DIR=$(dirname "$MCMETA")
+          echo "Packing resource pack from: $RP_DIR"
+          (cd "$RP_DIR" && zip -r "$GITHUB_WORKSPACE/QuestEconomy_ResourcePack.zip" .)
+
+      - name: Upload build outputs as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: QuestEconomy-build
+          path: |
+            **/target/QuestEconomy-*.jar
+            QuestEconomy_ResourcePack.zip
+
+      - name: Publish to the "latest" release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Latest build
+          files: |
+            **/target/QuestEconomy-*.jar
+            QuestEconomy_ResourcePack.zip

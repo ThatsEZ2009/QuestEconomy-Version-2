@@ -1,0 +1,47 @@
+# ============================================================
+#  QuestEconomy — quest pool
+#  Rewards are paid in coins by tier. Gold/Diamond coins are
+#  only made at the Mint (Pass 3), so quests pay Copper/Silver value.
+#  Reroll cost is in coin value (2 = 1 Silver).
+# ============================================================
+
+settings:
+  refresh-hours: 12
+  reroll-cost: 2
+
+rewards:
+  easy: 1
+  medium: 2
+  hard: 3
+  elite: 7
+
+# type = BLOCK_BREAK (mining) | HARVEST (crops) | KILL | BREED | TRAVEL | DELIVERY (turn-in)
+pool:
+  # ---------- MINING ----------
+  - { id: mine_coal,    category: MINING, tier: EASY,   type: BLOCK_BREAK, amount: 200, blocks: [COAL_ORE, DEEPSLATE_COAL_ORE],       name: "Mine <amt> coal ore" }
+  - { id: mine_iron,    category: MINING, tier: MEDIUM, type: BLOCK_BREAK, amount: 300, blocks: [IRON_ORE, DEEPSLATE_IRON_ORE],       name: "Mine <amt> iron ore" }
+  - { id: mine_gold,    category: MINING, tier: HARD,   type: BLOCK_BREAK, amount: 200, blocks: [GOLD_ORE, DEEPSLATE_GOLD_ORE],       name: "Mine <amt> gold ore" }
+  - { id: mine_diamond, category: MINING, tier: ELITE,  type: BLOCK_BREAK, amount: 250, blocks: [DIAMOND_ORE, DEEPSLATE_DIAMOND_ORE], name: "Mine <amt> diamond ore" }
+
+  # ---------- COMBAT ----------
+  - { id: kill_spiders, category: COMBAT, tier: EASY,   type: KILL, amount: 150, entities: [SPIDER, CAVE_SPIDER], name: "Kill <amt> spiders" }
+  - { id: kill_zombies, category: COMBAT, tier: MEDIUM, type: KILL, amount: 400, entities: [ZOMBIE],             name: "Kill <amt> zombies" }
+  - { id: kill_withers, category: COMBAT, tier: HARD,   type: KILL, amount: 30,  entities: [WITHER_SKELETON],    name: "Kill <amt> wither skeletons" }
+  - { id: kill_blazes,  category: COMBAT, tier: ELITE,  type: KILL, amount: 600, entities: [BLAZE],              name: "Kill <amt> blazes" }
+
+  # ---------- FARMING ----------
+  - { id: harvest_carrots, category: FARMING, tier: EASY,   type: HARVEST, amount: 500,   blocks: [CARROTS],        name: "Harvest <amt> carrots" }
+  - { id: breed_sheep,     category: FARMING, tier: MEDIUM, type: BREED,   amount: 20,    entities: [SHEEP],        name: "Breed <amt> sheep" }
+  - { id: breed_cows,      category: FARMING, tier: HARD,   type: BREED,   amount: 25,    entities: [COW],          name: "Breed <amt> cows" }
+  - { id: harvest_wheat,   category: FARMING, tier: ELITE,  type: HARVEST, amount: 10000, blocks: [WHEAT],          name: "Harvest <amt> wheat" }
+
+  # ---------- TRAVEL ----------
+  - { id: travel_3k,  category: TRAVEL, tier: EASY,   type: TRAVEL, amount: 3000,  name: "Travel <amt> blocks" }
+  - { id: travel_6k,  category: TRAVEL, tier: MEDIUM, type: TRAVEL, amount: 6000,  name: "Travel <amt> blocks" }
+  - { id: travel_10k, category: TRAVEL, tier: HARD,   type: TRAVEL, amount: 10000, name: "Travel <amt> blocks" }
+
+  # ---------- DELIVERY (turn in at the board) ----------
+  - { id: give_wheat,     category: DELIVERY, tier: EASY,   type: DELIVERY, amount: 128, items: [WHEAT],      name: "Turn in <amt> wheat" }
+  - { id: give_iron,      category: DELIVERY, tier: MEDIUM, type: DELIVERY, amount: 128, items: [IRON_INGOT], name: "Turn in <amt> iron ingots" }
+  - { id: give_leather,   category: DELIVERY, tier: HARD,   type: DELIVERY, amount: 640, items: [LEATHER],    name: "Turn in <amt> leather" }
+  - { id: give_gunpowder, category: DELIVERY, tier: ELITE,  type: DELIVERY, amount: 640, items: [GUNPOWDER],  name: "Turn in <amt> gunpowder" }

@@ -1,0 +1,29 @@
+# ============================================================
+#  QuestEconomy — main config
+#  (Pass 1 uses the coin + protection settings below.
+#   Quest / mint / teleport settings arrive in later passes.)
+# ============================================================
+
+coins:
+  # The base item every coin is built on. PAPER is invisible-friendly with the
+  # resource pack. Do not change unless you also change the pack's item override.
+  base-material: PAPER
+  # Custom model data numbers must match the resource pack (assets/minecraft/items/paper.json).
+  model-data:
+    copper: 1001
+    silver: 1002
+    gold: 1003
+    diamond: 1004
+  values:
+    copper: 1
+    silver: 2
+    gold: 5
+    diamond: 10
+
+protection:
+  # Block coins from being stored in ender chests.
+  block-ender-chests: true
+  # Block coins from being stored in shulker boxes.
+  block-shulker-boxes: true
+  # Block hoppers from moving coins into blocked containers.
+  block-hopper-transfer: true
