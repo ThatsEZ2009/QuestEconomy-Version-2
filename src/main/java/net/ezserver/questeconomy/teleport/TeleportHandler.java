@@ -94,7 +94,7 @@ public class TeleportHandler implements Listener, CommandExecutor {
         e.setCancelled(true);
         pending.put(id, new Pending(to.clone(), cost, label));
         p.sendMessage(MM.deserialize("<gold>[Quests]</gold> <gray>Teleport to <white>" + label
-                + "</white> for <yellow>" + cost + " coins</yellow>? "
+                + "</white> for <yellow>" + cost + " Copper Coins</yellow>? "
                 + "<click:run_command:'/qetp'><green><bold>[Confirm]</bold></green></click> "
                 + "<click:run_command:'/qetpcancel'><red>[Cancel]</red></click>"));
     }

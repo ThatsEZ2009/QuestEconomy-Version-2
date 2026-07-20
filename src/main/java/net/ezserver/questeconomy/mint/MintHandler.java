@@ -35,7 +35,7 @@ public class MintHandler implements Listener, CommandExecutor {
 
     // GUI slot -> action
     private static final int C_TO_S = 10, C_TO_G = 11, C_TO_D = 12, G_TO_D = 13;
-    private static final int B_SILVER = 15, B_GOLD = 16, B_DIAMOND = 17;
+    private static final int B_SILVER = 19, B_GOLD = 20, B_DIAMOND = 21;
 
     private final QuestEconomy plugin;
 
@@ -84,14 +84,18 @@ public class MintHandler implements Listener, CommandExecutor {
                 "<gray>Diamond: <white>" + dia + "</white>",
                 "<gray>Total value: <yellow>" + total + " coins</yellow>")));
 
-        inv.setItem(C_TO_S, coinButton(CoinType.SILVER, "<aqua>Merge → Silver", List.of("<gray>2 Copper → 1 Silver", "<gray>Converts all pairs you can.")));
-        inv.setItem(C_TO_G, coinButton(CoinType.GOLD, "<aqua>Merge → Gold", List.of("<gray>5 Copper → 1 Gold", "<gray>Converts all you can.")));
-        inv.setItem(C_TO_D, coinButton(CoinType.DIAMOND, "<aqua>Merge → Diamond", List.of("<gray>10 Copper → 1 Diamond", "<gray>Converts all you can.")));
-        inv.setItem(G_TO_D, coinButton(CoinType.DIAMOND, "<aqua>Merge Gold → Diamond", List.of("<gray>2 Gold → 1 Diamond", "<gray>Converts all pairs you can.")));
+        // Row labels
+        inv.setItem(9, named(Material.LIME_STAINED_GLASS_PANE, "<green><bold>MERGE UP</bold>", List.of("<gray>Combine coins into bigger ones.", "<gray>Each click converts one.")));
+        inv.setItem(18, named(Material.ORANGE_STAINED_GLASS_PANE, "<gold><bold>BREAK DOWN</bold>", List.of("<gray>Split a coin into smaller ones.", "<gray>Each click breaks one.")));
 
-        inv.setItem(B_SILVER, coinButton(CoinType.SILVER, "<yellow>Break Silver", List.of("<gray>1 Silver → 2 Copper", "<gray>One per click.")));
-        inv.setItem(B_GOLD, coinButton(CoinType.GOLD, "<yellow>Break Gold", List.of("<gray>1 Gold → 5 Copper", "<gray>One per click.")));
-        inv.setItem(B_DIAMOND, coinButton(CoinType.DIAMOND, "<yellow>Break Diamond", List.of("<gray>1 Diamond → 2 Gold", "<gray>One per click.")));
+        inv.setItem(C_TO_S, coinButton(CoinType.SILVER, "<aqua>Copper → Silver", List.of("<gray>Costs <white>2 Copper</white>", "<gray>Gives <white>1 Silver</white>", "<yellow>Click to convert one")));
+        inv.setItem(C_TO_G, coinButton(CoinType.GOLD, "<aqua>Copper → Gold", List.of("<gray>Costs <white>5 Copper</white>", "<gray>Gives <white>1 Gold</white>", "<yellow>Click to convert one")));
+        inv.setItem(C_TO_D, coinButton(CoinType.DIAMOND, "<aqua>Copper → Diamond", List.of("<gray>Costs <white>10 Copper</white>", "<gray>Gives <white>1 Diamond</white>", "<yellow>Click to convert one")));
+        inv.setItem(G_TO_D, coinButton(CoinType.DIAMOND, "<aqua>Gold → Diamond", List.of("<gray>Costs <white>2 Gold</white>", "<gray>Gives <white>1 Diamond</white>", "<yellow>Click to convert one")));
+
+        inv.setItem(B_SILVER, coinButton(CoinType.SILVER, "<gold>Break Silver", List.of("<gray>Costs <white>1 Silver</white>", "<gray>Gives <white>2 Copper</white>", "<yellow>Click to break one")));
+        inv.setItem(B_GOLD, coinButton(CoinType.GOLD, "<gold>Break Gold", List.of("<gray>Costs <white>1 Gold</white>", "<gray>Gives <white>5 Copper</white>", "<yellow>Click to break one")));
+        inv.setItem(B_DIAMOND, coinButton(CoinType.DIAMOND, "<gold>Break Diamond", List.of("<gray>Costs <white>1 Diamond</white>", "<gray>Gives <white>2 Gold</white>", "<yellow>Click to break one")));
 
         p.openInventory(inv);
     }
@@ -107,11 +111,12 @@ public class MintHandler implements Listener, CommandExecutor {
         var coins = plugin.coins();
         boolean did = false;
 
+        // Every button now converts exactly ONE step per click (merges and breaks both).
         switch (slot) {
-            case C_TO_S -> { int n = coins.amountOf(p, CoinType.COPPER) / 2;  if (n > 0) { coins.removeType(p, CoinType.COPPER, n * 2);  coins.giveType(p, CoinType.SILVER, n);  did = true; } }
-            case C_TO_G -> { int n = coins.amountOf(p, CoinType.COPPER) / 5;  if (n > 0) { coins.removeType(p, CoinType.COPPER, n * 5);  coins.giveType(p, CoinType.GOLD, n);    did = true; } }
-            case C_TO_D -> { int n = coins.amountOf(p, CoinType.COPPER) / 10; if (n > 0) { coins.removeType(p, CoinType.COPPER, n * 10); coins.giveType(p, CoinType.DIAMOND, n); did = true; } }
-            case G_TO_D -> { int n = coins.amountOf(p, CoinType.GOLD) / 2;    if (n > 0) { coins.removeType(p, CoinType.GOLD, n * 2);    coins.giveType(p, CoinType.DIAMOND, n); did = true; } }
+            case C_TO_S -> { if (coins.amountOf(p, CoinType.COPPER)  >= 2)  { coins.removeType(p, CoinType.COPPER, 2);   coins.giveType(p, CoinType.SILVER, 1);  did = true; } }
+            case C_TO_G -> { if (coins.amountOf(p, CoinType.COPPER)  >= 5)  { coins.removeType(p, CoinType.COPPER, 5);   coins.giveType(p, CoinType.GOLD, 1);    did = true; } }
+            case C_TO_D -> { if (coins.amountOf(p, CoinType.COPPER)  >= 10) { coins.removeType(p, CoinType.COPPER, 10);  coins.giveType(p, CoinType.DIAMOND, 1); did = true; } }
+            case G_TO_D -> { if (coins.amountOf(p, CoinType.GOLD)    >= 2)  { coins.removeType(p, CoinType.GOLD, 2);     coins.giveType(p, CoinType.DIAMOND, 1); did = true; } }
             case B_SILVER  -> { if (coins.amountOf(p, CoinType.SILVER)  >= 1) { coins.removeType(p, CoinType.SILVER, 1);  coins.giveType(p, CoinType.COPPER, 2); did = true; } }
             case B_GOLD    -> { if (coins.amountOf(p, CoinType.GOLD)    >= 1) { coins.removeType(p, CoinType.GOLD, 1);    coins.giveType(p, CoinType.COPPER, 5); did = true; } }
             case B_DIAMOND -> { if (coins.amountOf(p, CoinType.DIAMOND) >= 1) { coins.removeType(p, CoinType.DIAMOND, 1); coins.giveType(p, CoinType.GOLD, 2);   did = true; } }

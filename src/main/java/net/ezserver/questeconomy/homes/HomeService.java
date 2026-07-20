@@ -100,7 +100,7 @@ public class HomeService implements Listener, CommandExecutor {
         }
 
         p.sendMessage(MM.deserialize("<gold>[Quests]</gold> <gray>You have <white>" + total + "</white> home slots. "
-                + "Next slot costs <yellow>" + price + " coins</yellow>. "
+                + "Next slot costs <yellow>" + price + " Copper Coins</yellow>. "
                 + "<click:run_command:'/buyhome confirm'><green><bold>[Buy]</bold></green></click>"));
         return true;
     }
