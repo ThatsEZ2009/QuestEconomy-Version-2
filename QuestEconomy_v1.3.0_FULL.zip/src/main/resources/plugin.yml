@@ -1,0 +1,39 @@
+name: QuestEconomy
+version: 1.3.0
+main: net.ezserver.questeconomy.QuestEconomy
+# If the server log ever complains about api-version, set this to the value it suggests.
+api-version: '1.21'
+authors: [Kohen]
+description: Physical coin economy with quests and teleport costs.
+# HuskHomes hooks are added in Pass 3; listed as soft so the plugin loads with or without them.
+softdepend: [HuskHomes, HuskHomesGUI]
+
+commands:
+  qadmin:
+    description: Admin tools for QuestEconomy.
+    usage: /qadmin <givecoins|setboard|removeboard|setmint|removemint|reload|version>
+    aliases: [qe]
+  quests:
+    description: Open your daily quests.
+    usage: /quests
+    aliases: [quest, q]
+  mint:
+    description: Open the Coin Mint.
+    usage: /mint
+  buyhome:
+    description: Buy an extra home slot with coins.
+    usage: /buyhome
+  qetp:
+    description: Confirm a paid teleport.
+    usage: /qetp
+  qetpcancel:
+    description: Cancel a paid teleport.
+    usage: /qetpcancel
+
+permissions:
+  questeconomy.admin:
+    description: Access to /qadmin.
+    default: op
+  questeconomy.quests:
+    description: Access to /quests.
+    default: true
