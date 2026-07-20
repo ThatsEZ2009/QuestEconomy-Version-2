@@ -94,7 +94,7 @@ public class TeleportHandler implements Listener, CommandExecutor {
         e.setCancelled(true);
         pending.put(id, new Pending(to.clone(), cost, label));
         p.sendMessage(MM.deserialize("<gold>[Quests]</gold> <gray>Teleport to <white>" + label
-                + "</white> for <yellow>" + cost + " Copper Coins</yellow>? "
+                + "</white> for <#e0913a>" + cost + " Copper Coins</#e0913a>? "
                 + "<click:run_command:'/qetp'><green><bold>[Confirm]</bold></green></click> "
                 + "<click:run_command:'/qetpcancel'><red>[Cancel]</red></click>"));
     }
@@ -133,7 +133,7 @@ public class TeleportHandler implements Listener, CommandExecutor {
         }
         pending.put(p.getUniqueId(), new Pending(dest.clone(), cost, label));
         p.sendMessage(MM.deserialize("<gold>[Quests]</gold> <gray>Teleport to <white>" + label
-                + "</white> for <yellow>" + cost + " Copper Coins</yellow>? "
+                + "</white> for <#e0913a>" + cost + " Copper Coins</#e0913a>? "
                 + "<click:run_command:'/qetp'><green><bold>[Confirm]</bold></green></click> "
                 + "<click:run_command:'/qetpcancel'><red>[Cancel]</red></click>"));
     }

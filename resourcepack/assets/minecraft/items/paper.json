@@ -5,9 +5,7 @@
     "fallback": { "type": "minecraft:model", "model": "minecraft:item/paper" },
     "entries": [
       { "threshold": 1001, "model": { "type": "minecraft:model", "model": "questeconomy:item/coin_copper" } },
-      { "threshold": 1002, "model": { "type": "minecraft:model", "model": "questeconomy:item/coin_silver" } },
-      { "threshold": 1003, "model": { "type": "minecraft:model", "model": "questeconomy:item/coin_gold" } },
-      { "threshold": 1004, "model": { "type": "minecraft:model", "model": "questeconomy:item/coin_diamond" } }
+      { "threshold": 1002, "model": { "type": "minecraft:model", "model": "questeconomy:item/coin_silver" } }
     ]
   }
 }

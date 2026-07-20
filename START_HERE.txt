@@ -1,3 +1,9 @@
-QuestEconomy v1.5.0 — adds custom Java-only GUI backgrounds for the Quest Board & Coin Mint,
-plus the v1.4.0 homes GUI. NOTE: after building, re-download BOTH the jar AND the resource pack.
-The GUI background alignment (ascent/offset) is a first attempt and will likely need tuning.
+QuestEconomy v1.6.0
+- Coins: only Copper (1) and Silver (worth 3 Copper). Gold/Diamond removed.
+- Quests pay Copper only; Silver comes only from the Mint (3 Copper -> 1 Silver).
+- Mint cleaned up to Copper<->Silver, one coin per click.
+- Custom GUI backgrounds scrapped (plain menus again).
+- Homes menu: /homes (or /home, /homelist) shows up to 10 slots - your homes (teleport cost)
+  and locked slots you can buy in-menu. IMPORTANT: remove HuskHomesGUI so it can't bypass costs.
+Deploy: copy contents into your Version-2 clone (Replace All), Commit -> Push,
+re-download the jar AND the resource pack.

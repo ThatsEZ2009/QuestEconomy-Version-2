@@ -27,9 +27,9 @@ not-a-mint: "<red>That block isn't a Coin Mint."
 mint-nothing: "<red>You don't have the coins for that conversion."
 
 # Teleport costs & buy homes (Pass 3)
-tp-need-coins: "<red>You need <yellow><cost> Copper Coins</yellow> to teleport there."
-tp-paid: "<green>Teleported. <gray>(-<cost> Copper Coins)"
+tp-need-coins: "<red>You need <#e0913a><cost> Copper Coins</#e0913a> to teleport there."
+tp-paid: "<green>Teleported. <#e0913a>(-<cost> Copper Coins)"
 tp-cancelled: "<gray>Teleport cancelled."
 tp-nothing: "<gray>Nothing to confirm."
-buyhome-bought: "<green>Home slot purchased! You now have <white><total></white> homes. <gray>(-<cost> Copper Coins)"
-buyhome-cant-afford: "<red>You need <yellow><cost> Copper Coins</yellow> to buy the next home slot."
+buyhome-bought: "<green>Home slot purchased! You now have <white><total></white> homes. <#e0913a>(-<cost> Copper Coins)"
+buyhome-cant-afford: "<red>You need <#e0913a><cost> Copper Coins</#e0913a> to buy the next home slot."

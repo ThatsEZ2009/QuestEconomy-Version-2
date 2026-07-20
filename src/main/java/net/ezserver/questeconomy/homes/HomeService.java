@@ -69,6 +69,42 @@ public class HomeService implements Listener, CommandExecutor {
         return plugin.getConfig().getInt("homes.price-after", 20);
     }
 
+    // ---- public API for the homes GUI ----
+
+    public int maxHomes() { return plugin.getConfig().getInt("homes.max", 10); }
+
+    /** Current home limit for a player (free + purchased). */
+    public int currentLimit(Player p) { return freeHomes() + bought(p.getUniqueId()); }
+
+    public int nextSlotPrice(Player p) { return nextPrice(p.getUniqueId()); }
+
+    /** Cost to unlock home number 'homeNumber' (1-based); 0 if it's a free slot. */
+    public int priceForHome(int homeNumber) {
+        int free = freeHomes();
+        if (homeNumber <= free) return 0;
+        List<Integer> prices = plugin.getConfig().getIntegerList("homes.prices");
+        int idx = homeNumber - free - 1;
+        if (idx < prices.size()) return prices.get(idx);
+        return plugin.getConfig().getInt("homes.price-after", 20);
+    }
+
+    /** Buy the next home slot (charges + grants). Returns true on success. */
+    public boolean buyNextSlot(Player p) {
+        UUID id = p.getUniqueId();
+        if (currentLimit(p) >= maxHomes()) return false;
+        int price = nextPrice(id);
+        if (!plugin.coins().has(p, price)) {
+            plugin.msg().send(p, "buyhome-cant-afford", "cost", String.valueOf(price));
+            return false;
+        }
+        plugin.coins().pay(p, price);
+        purchased.merge(id, 1, Integer::sum);
+        applyLimit(p);
+        save();
+        plugin.msg().send(p, "buyhome-bought", "total", String.valueOf(currentLimit(p)), "cost", String.valueOf(price));
+        return true;
+    }
+
     @EventHandler
     public void onJoin(PlayerJoinEvent e) { applyLimit(e.getPlayer()); }
 
@@ -90,17 +126,16 @@ public class HomeService implements Listener, CommandExecutor {
         int price = nextPrice(id);
 
         if (args.length >= 1 && args[0].equalsIgnoreCase("confirm")) {
-            if (!plugin.coins().has(p, price)) { plugin.msg().send(p, "buyhome-cant-afford", "cost", String.valueOf(price)); return true; }
-            plugin.coins().pay(p, price);
-            purchased.merge(id, 1, Integer::sum);
-            applyLimit(p);
-            save();
-            plugin.msg().send(p, "buyhome-bought", "total", String.valueOf(total + 1), "cost", String.valueOf(price));
+            buyNextSlot(p);
             return true;
         }
 
+        if (currentLimit(p) >= maxHomes()) {
+            p.sendMessage(MM.deserialize("<gold>[Quests]</gold> <gray>You already have the maximum of <white>" + maxHomes() + "</white> homes."));
+            return true;
+        }
         p.sendMessage(MM.deserialize("<gold>[Quests]</gold> <gray>You have <white>" + total + "</white> home slots. "
-                + "Next slot costs <yellow>" + price + " Copper Coins</yellow>. "
+                + "Next slot costs <#e0913a>" + price + " Copper Coins</#e0913a>. "
                 + "<click:run_command:'/buyhome confirm'><green><bold>[Buy]</bold></green></click>"));
         return true;
     }

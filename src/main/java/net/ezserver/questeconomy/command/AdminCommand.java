@@ -20,7 +20,7 @@ import java.util.List;
 public class AdminCommand implements CommandExecutor, TabCompleter {
 
     // Bump this every time a new build is shipped, so /qadmin version confirms what's running.
-    public static final String BUILD = "Pass 5 — build 7 (custom GUI backgrounds, Java)";
+    public static final String BUILD = "Pass 6 — build 8 (2-coin economy + 10-slot homes menu)";
 
     private final QuestEconomy plugin;
 
@@ -121,7 +121,7 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
             return filter(names, args[1]);
         }
         if (args.length == 3 && args[0].equalsIgnoreCase("givecoins")) {
-            return filter(Arrays.asList("copper", "silver", "gold", "diamond"), args[2]);
+            return filter(Arrays.asList("copper", "silver"), args[2]);
         }
         return List.of();
     }

@@ -66,7 +66,7 @@ public final class QuestEconomy extends JavaPlugin {
 
         // Homes GUI with per-home costs (only if HuskHomes is installed)
         if (getServer().getPluginManager().getPlugin("HuskHomes") != null) {
-            HomesGui homesGui = new HomesGui(this, teleportHandler);
+            HomesGui homesGui = new HomesGui(this, teleportHandler, homeService);
             if (homesGui.setup()) {
                 getServer().getPluginManager().registerEvents(homesGui, this);
                 PluginCommand homes = getCommand("homes");

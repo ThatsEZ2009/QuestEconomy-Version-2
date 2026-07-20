@@ -1,6 +1,7 @@
 package net.ezserver.questeconomy.quest;
 
 import net.ezserver.questeconomy.QuestEconomy;
+import net.ezserver.questeconomy.coin.CoinType;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -291,9 +292,9 @@ public class QuestManager {
     private void complete(Player p, ActiveQuest aq) {
         aq.completed = true;
         int coins = reward.getOrDefault(aq.def.tier, 1);
-        plugin.coins().give(p, coins);
+        plugin.coins().giveType(p, CoinType.COPPER, coins); // quests pay Copper only
         p.sendMessage(net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(
-                "<gold>[Quests]</gold> <green>Completed: <white>" + aq.def.display() + "</white> — earned <yellow>" + coins + " coins</yellow>!"));
+                "<gold>[Quests]</gold> <green>Completed: <white>" + aq.def.display() + "</white> — earned <#e0913a>" + coins + " Copper</#e0913a>!"));
         p.playSound(p.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, 1f, 1.4f);
     }
 

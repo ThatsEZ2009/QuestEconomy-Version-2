@@ -1,11 +1,9 @@
 package net.ezserver.questeconomy.coin;
 
-/** The four coin tiers. Canonical values/model-data live here; config can override amounts. */
+/** Two coin tiers. Copper is the base; Silver is worth 3 Copper and only made at the Mint. */
 public enum CoinType {
-    COPPER("Copper", 1, 1001, "#c87f3a"),
-    SILVER("Silver", 2, 1002, "#b8c0c6"),
-    GOLD("Gold", 5, 1003, "#e8c14a"),
-    DIAMOND("Diamond", 10, 1004, "#4fd6c8");
+    COPPER("Copper", 1, 1001, "#e0913a"),   // orange
+    SILVER("Silver", 3, 1002, "#c2c8ce");   // grey
 
     public final String display;
     public final int defaultValue;
@@ -27,13 +25,13 @@ public enum CoinType {
         return null;
     }
 
-    /** Highest value first: DIAMOND, GOLD, SILVER, COPPER. */
+    /** Highest value first: SILVER, COPPER. */
     public static CoinType[] descending() {
-        return new CoinType[]{DIAMOND, GOLD, SILVER, COPPER};
+        return new CoinType[]{SILVER, COPPER};
     }
 
-    /** Lowest value first: COPPER, SILVER, GOLD, DIAMOND. */
+    /** Lowest value first: COPPER, SILVER. */
     public static CoinType[] ascending() {
-        return new CoinType[]{COPPER, SILVER, GOLD, DIAMOND};
+        return new CoinType[]{COPPER, SILVER};
     }
 }

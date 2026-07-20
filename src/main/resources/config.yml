@@ -12,13 +12,9 @@ coins:
   model-data:
     copper: 1001
     silver: 1002
-    gold: 1003
-    diamond: 1004
   values:
     copper: 1
-    silver: 2
-    gold: 5
-    diamond: 10
+    silver: 3
 
 protection:
   # Block coins from being stored in ender chests.
@@ -48,6 +44,7 @@ teleport:
 # ---------------- Buy extra homes (Pass 3) ----------------
 homes:
   free: 2                       # free home slots before buying
+  max: 10                       # highest number of homes a player can own
   prices: [5, 10, 17, 20, 35]   # cost of the 3rd, 4th, 5th, 6th, 7th home
   price-after: 20               # cost of each home beyond the list
   # NOTE: set HuskHomes' own max_homes to 2 (or your 'free' value) so purchases add on top.

@@ -1,6 +1,7 @@
 package net.ezserver.questeconomy.homesgui;
 
 import net.ezserver.questeconomy.QuestEconomy;
+import net.ezserver.questeconomy.homes.HomeService;
 import net.ezserver.questeconomy.teleport.TeleportHandler;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -32,24 +33,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-/** A native homes menu that shows each home's coin cost and charges (with confirm) on click. */
+/** Homes menu: 10 slots showing owned homes (teleport cost) and buyable slots (unlock price). */
 public class HomesGui implements Listener, CommandExecutor {
 
     private static final MiniMessage MM = MiniMessage.miniMessage();
+    private static final int[] SLOTS = {10, 11, 12, 13, 14, 19, 20, 21, 22, 23};
 
     private final QuestEconomy plugin;
     private final TeleportHandler teleport;
+    private final HomeService homeService;
     private HuskHomesAPI api;
-    private final Map<UUID, List<Entry>> viewing = new HashMap<>();
+    private final Map<UUID, Slot[]> viewing = new HashMap<>();
 
-    private record Entry(String name, Location loc, int cost) {}
+    private enum Kind { HOME, BUY, NONE }
+    private record Slot(Kind kind, Location loc, int cost) {}
 
-    public HomesGui(QuestEconomy plugin, TeleportHandler teleport) {
+    public HomesGui(QuestEconomy plugin, TeleportHandler teleport, HomeService homeService) {
         this.plugin = plugin;
         this.teleport = teleport;
+        this.homeService = homeService;
     }
 
-    /** Hook the HuskHomes API. Returns false if HuskHomes isn't installed. */
     public boolean setup() {
         if (Bukkit.getPluginManager().getPlugin("HuskHomes") == null) return false;
         try {
@@ -68,13 +72,15 @@ public class HomesGui implements Listener, CommandExecutor {
         return true;
     }
 
-    /** Intercept HuskHomes' /homelist so our costed menu opens instead. */
+    /** Intercept HuskHomes' /homelist and /home so our costed menu opens instead. */
     @EventHandler(ignoreCancelled = true)
     public void onCommand(PlayerCommandPreprocessEvent e) {
         String msg = e.getMessage();
         String cmd = (msg.startsWith("/") ? msg.substring(1) : msg).split(" ")[0].toLowerCase();
         if (cmd.contains(":")) cmd = cmd.substring(cmd.indexOf(':') + 1);
-        if (cmd.equals("homelist") || cmd.equals("homes")) {
+        // Plain /home or /homes or /homelist -> our menu. (/home <name> is left to HuskHomes so it teleports + charges.)
+        boolean bare = e.getMessage().trim().split(" ").length == 1;
+        if (cmd.equals("homelist") || cmd.equals("homes") || (cmd.equals("home") && bare)) {
             e.setCancelled(true);
             openFor(e.getPlayer());
         }
@@ -88,31 +94,55 @@ public class HomesGui implements Listener, CommandExecutor {
     }
 
     private void build(Player p, List<Home> homes) {
-        List<Entry> entries = new ArrayList<>();
-        for (Home h : homes) {
-            World w = Bukkit.getWorld(h.getWorld().getName());
-            if (w == null) continue;
-            Location loc = new Location(w, h.getX(), h.getY(), h.getZ());
-            int cost = teleport.homeTeleportCost(p.getLocation(), loc);
-            entries.add(new Entry(h.getName(), loc, cost));
-        }
-        viewing.put(p.getUniqueId(), entries);
+        int limit = homeService.currentLimit(p);
+        int max = homeService.maxHomes();
 
-        int rows = Math.max(1, (int) Math.ceil(entries.size() / 9.0));
-        int size = Math.min(54, rows * 9);
+        Slot[] slots = new Slot[SLOTS.length];
         Holder holder = new Holder();
-        Inventory inv = Bukkit.createInventory(holder, size, MM.deserialize("<dark_aqua>Your Homes"));
+        Inventory inv = Bukkit.createInventory(holder, 27, MM.deserialize("<dark_aqua>Your Homes"));
         holder.inv = inv;
 
-        for (int i = 0; i < entries.size() && i < size; i++) {
-            Entry e = entries.get(i);
-            String costLine = e.cost() <= 0 ? "<green>Free" : "<yellow>" + e.cost() + " Copper Coins";
-            inv.setItem(i, item(Material.RED_BED, "<aqua>" + e.name(),
-                    List.of("<gray>Cost to teleport: " + costLine, "<yellow>Click to teleport")));
+        ItemStack filler = named(Material.GRAY_STAINED_GLASS_PANE, " ", List.of());
+        for (int i = 0; i < 27; i++) inv.setItem(i, filler);
+
+        inv.setItem(4, named(Material.ENDER_PEARL, "<dark_aqua>Your Homes", List.of(
+                "<gray>Homes: <white>" + homes.size() + " / " + limit + "</white>",
+                "<gray>Buy locked slots below.")));
+
+        for (int i = 0; i < SLOTS.length; i++) {
+            int homeNum = i + 1;                 // 1..10
+            int slotPos = SLOTS[i];
+            if (i < homes.size()) {
+                // owned home
+                Home h = homes.get(i);
+                World w = Bukkit.getWorld(h.getWorld().getName());
+                if (w == null) { slots[i] = new Slot(Kind.NONE, null, 0); continue; }
+                Location loc = new Location(w, h.getX(), h.getY(), h.getZ());
+                int cost = teleport.homeTeleportCost(p.getLocation(), loc);
+                String costLine = cost <= 0 ? "<green>Free" : "<#e0913a>" + cost + " Copper Coins";
+                inv.setItem(slotPos, named(Material.RED_BED, "<aqua>" + h.getName(),
+                        List.of("<gray>Teleport cost: " + costLine, "<yellow>Click to teleport")));
+                slots[i] = new Slot(Kind.HOME, loc, cost);
+            } else if (homeNum <= limit) {
+                // unlocked but empty
+                inv.setItem(slotPos, named(Material.LIME_STAINED_GLASS_PANE, "<green>Empty slot #" + homeNum,
+                        List.of("<gray>Use <white>/sethome</white> here to fill it.")));
+                slots[i] = new Slot(Kind.NONE, null, 0);
+            } else if (homeNum == limit + 1 && limit < max) {
+                // next buyable slot
+                int price = homeService.priceForHome(homeNum);
+                inv.setItem(slotPos, named(Material.GOLD_INGOT, "<gold>Unlock Home #" + homeNum,
+                        List.of("<gray>Cost: <#e0913a>" + price + " Copper Coins</#e0913a>", "<yellow>Click to buy")));
+                slots[i] = new Slot(Kind.BUY, null, price);
+            } else {
+                // locked (must buy earlier ones first)
+                int price = homeService.priceForHome(homeNum);
+                inv.setItem(slotPos, named(Material.BARRIER, "<dark_gray>Home #" + homeNum + " (locked)",
+                        List.of("<gray>Unlock the earlier slots first.", "<dark_gray>Eventual cost: " + price + " Copper Coins")));
+                slots[i] = new Slot(Kind.NONE, null, 0);
+            }
         }
-        if (entries.isEmpty()) {
-            inv.setItem(0, item(Material.BARRIER, "<red>No homes yet", List.of("<gray>Use /sethome to make one.")));
-        }
+        viewing.put(p.getUniqueId(), slots);
         p.openInventory(inv);
     }
 
@@ -121,12 +151,23 @@ public class HomesGui implements Listener, CommandExecutor {
         if (!(e.getInventory().getHolder() instanceof Holder)) return;
         e.setCancelled(true);
         if (!(e.getWhoClicked() instanceof Player p)) return;
-        int slot = e.getRawSlot();
-        List<Entry> entries = viewing.get(p.getUniqueId());
-        if (entries == null || slot < 0 || slot >= entries.size()) return;
-        Entry entry = entries.get(slot);
-        p.closeInventory();
-        teleport.requestPaidTeleport(p, entry.loc(), entry.cost(), entry.name());
+        Slot[] slots = viewing.get(p.getUniqueId());
+        if (slots == null) return;
+        int raw = e.getRawSlot();
+        int idx = -1;
+        for (int i = 0; i < SLOTS.length; i++) if (SLOTS[i] == raw) { idx = i; break; }
+        if (idx < 0) return;
+        Slot s = slots[idx];
+        if (s == null || s.kind() == Kind.NONE) return;
+
+        if (s.kind() == Kind.HOME) {
+            p.closeInventory();
+            teleport.requestPaidTeleport(p, s.loc(), s.cost(), "your home");
+        } else if (s.kind() == Kind.BUY) {
+            if (homeService.buyNextSlot(p)) {
+                openFor(p); // refresh
+            }
+        }
     }
 
     private static final class Holder implements InventoryHolder {
@@ -134,13 +175,15 @@ public class HomesGui implements Listener, CommandExecutor {
         @Override public @NotNull Inventory getInventory() { return inv; }
     }
 
-    private ItemStack item(Material m, String name, List<String> lore) {
+    private ItemStack named(Material m, String name, List<String> lore) {
         ItemStack it = new ItemStack(m);
         ItemMeta meta = it.getItemMeta();
         meta.displayName(MM.deserialize(name).decoration(TextDecoration.ITALIC, false));
-        List<Component> l = new ArrayList<>();
-        for (String s : lore) l.add(MM.deserialize(s).decoration(TextDecoration.ITALIC, false));
-        meta.lore(l);
+        if (!lore.isEmpty()) {
+            List<Component> l = new ArrayList<>();
+            for (String s : lore) l.add(MM.deserialize(s).decoration(TextDecoration.ITALIC, false));
+            meta.lore(l);
+        }
         it.setItemMeta(meta);
         return it;
     }
