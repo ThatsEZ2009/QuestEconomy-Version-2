@@ -38,6 +38,8 @@ public class HomesGui implements Listener, CommandExecutor {
 
     private static final MiniMessage MM = MiniMessage.miniMessage();
     private static final int[] SLOTS = {10, 11, 12, 13, 14, 19, 20, 21, 22, 23};
+    private static final int SPAWN_SLOT = 16;
+    private static final int RTP_SLOT = 25;
 
     private final QuestEconomy plugin;
     private final TeleportHandler teleport;
@@ -142,6 +144,12 @@ public class HomesGui implements Listener, CommandExecutor {
                 slots[i] = new Slot(Kind.NONE, null, 0);
             }
         }
+        // Extra travel options on the right-hand columns
+        inv.setItem(SPAWN_SLOT, named(Material.COMPASS, "<green>Spawn",
+                List.of("<gray>Teleport to server spawn.", "<green>Free", "<yellow>Click to go")));
+        inv.setItem(RTP_SLOT, named(Material.ENDER_EYE, "<light_purple>Random Teleport",
+                List.of("<gray>Drop somewhere random in the wild.", "<green>Free", "<yellow>Click to go")));
+
         viewing.put(p.getUniqueId(), slots);
         p.openInventory(inv);
     }
@@ -151,9 +159,12 @@ public class HomesGui implements Listener, CommandExecutor {
         if (!(e.getInventory().getHolder() instanceof Holder)) return;
         e.setCancelled(true);
         if (!(e.getWhoClicked() instanceof Player p)) return;
+        int raw = e.getRawSlot();
+        if (raw == SPAWN_SLOT) { p.closeInventory(); p.performCommand("spawn"); return; }
+        if (raw == RTP_SLOT)   { p.closeInventory(); p.performCommand("rtp"); return; }
+
         Slot[] slots = viewing.get(p.getUniqueId());
         if (slots == null) return;
-        int raw = e.getRawSlot();
         int idx = -1;
         for (int i = 0; i < SLOTS.length; i++) if (SLOTS[i] == raw) { idx = i; break; }
         if (idx < 0) return;
