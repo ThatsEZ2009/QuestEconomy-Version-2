@@ -149,8 +149,10 @@ public class QuestHandler implements Listener, CommandExecutor {
     public void openGui(Player p) {
         List<ActiveQuest> quests = qm.getQuests(p);
         QuestHolder holder = new QuestHolder();
+        // Custom GUI background (Java resource pack). Bedrock players see a plain title.
+        String bg = "" + (char) 0xE010 + (char) 0xE001;
         Inventory inv = Bukkit.createInventory(holder, 27,
-                MM.deserialize("<dark_aqua>Daily Quests"));
+                MM.deserialize("<font:questeconomy:gui>" + bg + "</font>"));
         holder.inv = inv;
 
         ItemStack filler = pane(Material.GRAY_STAINED_GLASS_PANE, " ");

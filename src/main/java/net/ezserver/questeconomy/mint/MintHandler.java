@@ -65,7 +65,9 @@ public class MintHandler implements Listener, CommandExecutor {
 
     public void open(Player p) {
         MintHolder holder = new MintHolder();
-        Inventory inv = Bukkit.createInventory(holder, 27, MM.deserialize("<gold>Coin Mint"));
+        // Custom GUI background (Java resource pack). Bedrock players see a plain title.
+        String bg = "" + (char) 0xE010 + (char) 0xE002;
+        Inventory inv = Bukkit.createInventory(holder, 27, MM.deserialize("<font:questeconomy:gui>" + bg + "</font>"));
         holder.inv = inv;
 
         ItemStack filler = simple(Material.BROWN_STAINED_GLASS_PANE, " ");
