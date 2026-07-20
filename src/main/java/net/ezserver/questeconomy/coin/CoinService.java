@@ -38,6 +38,32 @@ public class CoinService {
         return n;
     }
 
+    /** Remove exactly 'count' coins of a specific type. Returns false (and removes nothing) if short. */
+    public boolean removeType(Player p, CoinType type, int count) {
+        if (amountOf(p, type) < count) return false;
+        int remaining = count;
+        ItemStack[] contents = p.getInventory().getContents();
+        for (int i = 0; i < contents.length && remaining > 0; i++) {
+            if (coins.typeOf(contents[i]) == type) {
+                ItemStack it = contents[i];
+                int amt = it.getAmount();
+                if (amt <= remaining) { remaining -= amt; p.getInventory().setItem(i, null); }
+                else { it.setAmount(amt - remaining); remaining = 0; }
+            }
+        }
+        return true;
+    }
+
+    /** Give 'count' physical coins of a specific type (drops overflow). */
+    public void giveType(Player p, CoinType type, int count) {
+        while (count > 0) {
+            int stack = Math.min(64, count);
+            var leftover = p.getInventory().addItem(coins.create(type, stack));
+            for (ItemStack drop : leftover.values()) p.getWorld().dropItemNaturally(p.getLocation(), drop);
+            count -= stack;
+        }
+    }
+
     /** Give a coin VALUE to the player as the fewest items possible (diamonds first). Drops overflow. */
     public void give(Player p, int value) {
         if (value <= 0) return;

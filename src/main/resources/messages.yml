@@ -18,3 +18,18 @@ board-set: "<green>Quest Board set! Right-click it to open the quest menu."
 board-removed: "<green>Quest Board removed."
 board-exists: "<yellow>That block is already a Quest Board."
 not-a-board: "<red>That block isn't a Quest Board."
+
+# Coin Mint (Pass 3)
+mint-set: "<green>Coin Mint set! Right-click it to convert coins."
+mint-removed: "<green>Coin Mint removed."
+mint-exists: "<yellow>That block is already a Coin Mint."
+not-a-mint: "<red>That block isn't a Coin Mint."
+mint-nothing: "<red>You don't have the coins for that conversion."
+
+# Teleport costs & buy homes (Pass 3)
+tp-need-coins: "<red>You need <yellow><cost> coins</yellow> to teleport there."
+tp-paid: "<green>Teleported. <gray>(-<cost> coins)"
+tp-cancelled: "<gray>Teleport cancelled."
+tp-nothing: "<gray>Nothing to confirm."
+buyhome-bought: "<green>Home slot purchased! You now have <white><total></white> homes. <gray>(-<cost> coins)"
+buyhome-cant-afford: "<red>You need <yellow><cost> coins</yellow> to buy the next home slot."

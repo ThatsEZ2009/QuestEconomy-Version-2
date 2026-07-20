@@ -1,3 +1,4 @@
-QuestEconomy — clean full project (v1.1.0, Pass 2).
-Everything is at the top level here: pom.xml, src, resourcepack, .github
-Upload the WHOLE thing to a FRESH empty GitHub repo (see chat for steps).
+QuestEconomy v1.3.0 — FULL project (Pass 1 + 2 + 3).
+Everything at top level: pom.xml, src, resourcepack, .github
+Extract this into your local repo folder (C:\QuestEconomy), choose Replace All,
+then in GitHub Desktop: Commit -> Push. Build -> download QuestEconomy-1.3.0.jar.

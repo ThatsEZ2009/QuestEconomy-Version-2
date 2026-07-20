@@ -20,7 +20,7 @@ import java.util.List;
 public class AdminCommand implements CommandExecutor, TabCompleter {
 
     // Bump this every time a new build is shipped, so /qadmin version confirms what's running.
-    public static final String BUILD = "Pass 2 — build 2 (quests)";
+    public static final String BUILD = "Pass 3 — build 4 (mint + teleport costs + buy homes)";
 
     private final QuestEconomy plugin;
 
@@ -60,6 +60,18 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
                 } else {
                     if (plugin.quests().removeBoard(b.getLocation())) plugin.msg().send(p, "board-removed");
                     else plugin.msg().send(p, "not-a-board");
+                }
+            }
+            case "setmint", "removemint" -> {
+                if (!(sender instanceof Player p)) { plugin.msg().send(sender, "players-only"); return true; }
+                Block b = p.getTargetBlockExact(6);
+                if (b == null || b.getType().isAir()) { plugin.msg().send(p, "look-at-block"); return true; }
+                if (args[0].equalsIgnoreCase("setmint")) {
+                    if (plugin.quests().addMint(b.getLocation())) plugin.msg().send(p, "mint-set");
+                    else plugin.msg().send(p, "mint-exists");
+                } else {
+                    if (plugin.quests().removeMint(b.getLocation())) plugin.msg().send(p, "mint-removed");
+                    else plugin.msg().send(p, "not-a-mint");
                 }
             }
             case "givecoins" -> {
@@ -102,7 +114,7 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
-        if (args.length == 1) return filter(Arrays.asList("givecoins", "setboard", "removeboard", "reload", "version"), args[0]);
+        if (args.length == 1) return filter(Arrays.asList("givecoins", "setboard", "removeboard", "setmint", "removemint", "reload", "version"), args[0]);
         if (args.length == 2 && args[0].equalsIgnoreCase("givecoins")) {
             List<String> names = new ArrayList<>();
             for (Player p : Bukkit.getOnlinePlayers()) names.add(p.getName());

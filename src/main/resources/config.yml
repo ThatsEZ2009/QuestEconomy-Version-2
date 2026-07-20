@@ -27,3 +27,27 @@ protection:
   block-shulker-boxes: true
   # Block hoppers from moving coins into blocked containers.
   block-hopper-transfer: true
+
+# ---------------- Teleport costs (Pass 3) ----------------
+teleport:
+  # Show a [Confirm]/[Cancel] prompt with the cost before teleporting.
+  confirm: true
+  # Flat cost to teleport to a friend (/tpa).
+  tpa-cost: 1
+  home:
+    free-distance: 150   # 0-150 blocks is free
+    d1-max: 2500         # up to 2500 blocks ->
+    d1-cost: 1
+    d2-max: 4000         # up to 4000 blocks ->
+    d2-cost: 2
+    d3-max: 6000         # up to 6000 blocks ->
+    d3-cost: 3
+    cap-cost: 4          # beyond d3-max
+    cross-world-cost: 3  # teleport to a home in another dimension
+
+# ---------------- Buy extra homes (Pass 3) ----------------
+homes:
+  free: 2                       # free home slots before buying
+  prices: [5, 10, 17, 20, 35]   # cost of the 3rd, 4th, 5th, 6th, 7th home
+  price-after: 20               # cost of each home beyond the list
+  # NOTE: set HuskHomes' own max_homes to 2 (or your 'free' value) so purchases add on top.

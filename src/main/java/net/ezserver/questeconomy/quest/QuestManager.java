@@ -62,6 +62,7 @@ public class QuestManager {
     private final List<QuestDef> pool = new ArrayList<>();
     private final Map<UUID, PlayerData> players = new HashMap<>();
     private final Set<String> boards = new HashSet<>();
+    private final Set<String> mints = new HashSet<>();
     private final Random rng = new Random();
 
     private int refreshHours = 12;
@@ -150,6 +151,8 @@ public class QuestManager {
 
         boards.clear();
         boards.addAll(data.getStringList("boards"));
+        mints.clear();
+        mints.addAll(data.getStringList("mints"));
 
         players.clear();
         ConfigurationSection ps = data.getConfigurationSection("players");
@@ -178,6 +181,7 @@ public class QuestManager {
     public void save() {
         if (data == null) return;
         data.set("boards", new ArrayList<>(boards));
+        data.set("mints", new ArrayList<>(mints));
         data.set("players", null);
         for (Map.Entry<UUID, PlayerData> e : players.entrySet()) {
             String base = "players." + e.getKey();
@@ -308,6 +312,20 @@ public class QuestManager {
 
     public boolean removeBoard(Location l) {
         boolean removed = boards.remove(key(l));
+        if (removed) save();
+        return removed;
+    }
+
+    public boolean isMint(Location l) { return mints.contains(key(l)); }
+
+    public boolean addMint(Location l) {
+        boolean added = mints.add(key(l));
+        if (added) save();
+        return added;
+    }
+
+    public boolean removeMint(Location l) {
+        boolean removed = mints.remove(key(l));
         if (removed) save();
         return removed;
     }

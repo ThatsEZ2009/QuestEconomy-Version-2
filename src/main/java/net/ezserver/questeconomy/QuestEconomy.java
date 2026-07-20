@@ -5,8 +5,11 @@ import net.ezserver.questeconomy.coin.CoinListener;
 import net.ezserver.questeconomy.coin.CoinService;
 import net.ezserver.questeconomy.coin.CoinType;
 import net.ezserver.questeconomy.command.AdminCommand;
+import net.ezserver.questeconomy.homes.HomeService;
+import net.ezserver.questeconomy.mint.MintHandler;
 import net.ezserver.questeconomy.quest.QuestHandler;
 import net.ezserver.questeconomy.quest.QuestManager;
+import net.ezserver.questeconomy.teleport.TeleportHandler;
 import net.ezserver.questeconomy.util.Messages;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -17,6 +20,7 @@ public final class QuestEconomy extends JavaPlugin {
     private CoinService coinService;
     private Messages messages;
     private QuestManager questManager;
+    private HomeService homeService;
 
     @Override
     public void onEnable() {
@@ -38,6 +42,27 @@ public final class QuestEconomy extends JavaPlugin {
         // Autosave quest progress every 3 minutes (hot paths only touch memory).
         getServer().getScheduler().runTaskTimer(this, questManager::save, 20L * 60 * 3, 20L * 60 * 3);
 
+        // Coin Mint
+        MintHandler mintHandler = new MintHandler(this);
+        getServer().getPluginManager().registerEvents(mintHandler, this);
+        PluginCommand mint = getCommand("mint");
+        if (mint != null) mint.setExecutor(mintHandler);
+
+        // Teleport costs
+        TeleportHandler teleportHandler = new TeleportHandler(this);
+        getServer().getPluginManager().registerEvents(teleportHandler, this);
+        PluginCommand qetp = getCommand("qetp");
+        if (qetp != null) qetp.setExecutor(teleportHandler);
+        PluginCommand qetpcancel = getCommand("qetpcancel");
+        if (qetpcancel != null) qetpcancel.setExecutor(teleportHandler);
+
+        // Buy extra homes
+        this.homeService = new HomeService(this);
+        this.homeService.load();
+        getServer().getPluginManager().registerEvents(homeService, this);
+        PluginCommand buyhome = getCommand("buyhome");
+        if (buyhome != null) buyhome.setExecutor(homeService);
+
         PluginCommand cmd = getCommand("qadmin");
         if (cmd != null) {
             AdminCommand ac = new AdminCommand(this);
@@ -45,13 +70,16 @@ public final class QuestEconomy extends JavaPlugin {
             cmd.setTabCompleter(ac);
         }
 
-        getLogger().info("QuestEconomy enabled (Pass 2: coins + quests).");
+        getLogger().info("QuestEconomy enabled (Pass 3: coins + quests + mint + teleport costs).");
     }
 
     @Override
     public void onDisable() {
         if (questManager != null) questManager.save();
+        if (homeService != null) homeService.save();
     }
+
+    public HomeService homes() { return homeService; }
 
     // Coin value / model-data resolution (config overrides the enum defaults).
     public int valueOf(CoinType t) {
