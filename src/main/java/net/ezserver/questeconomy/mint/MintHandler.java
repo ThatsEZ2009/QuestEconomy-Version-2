@@ -57,7 +57,7 @@ public class MintHandler implements Listener, CommandExecutor {
         return true;
     }
 
-    private static final class MintHolder implements InventoryHolder {
+    private static final class MintHolder implements net.ezserver.questeconomy.util.PluginGui {
         Inventory inv;
         @Override public @NotNull Inventory getInventory() { return inv; }
     }

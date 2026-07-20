@@ -17,11 +17,16 @@ coins:
     silver: 3
 
 protection:
-  # Block coins from being stored in ender chests.
+  # Coins CAN be stored in normal chests out in the world, so players aren't scared to
+  # go questing. What they CAN'T do is vault them inside a claimed plot at spawn -
+  # that rule lives in PropertyShop's "no-vault" section.
+  # Set this true to go extreme: coins can't go in ANY container anywhere.
+  carry-only: false
+
+  # Ender chests and shulkers are portable safes, so coins are blocked from them
+  # EVERYWHERE - otherwise players would just bypass the no-vault rule with one.
   block-ender-chests: true
-  # Block coins from being stored in shulker boxes.
   block-shulker-boxes: true
-  # Block hoppers from moving coins into blocked containers.
   block-hopper-transfer: true
 
 # ---------------- Teleport costs (Pass 3) ----------------

@@ -20,7 +20,7 @@ import java.util.List;
 public class AdminCommand implements CommandExecutor, TabCompleter {
 
     // Bump this every time a new build is shipped, so /qadmin version confirms what's running.
-    public static final String BUILD = "Pass 6.1 — build 9 (homes menu + Spawn/RTP buttons)";
+    public static final String BUILD = "Pass 7 — build 11 (chest-safe coins + no-vault at plots)";
 
     private final QuestEconomy plugin;
 

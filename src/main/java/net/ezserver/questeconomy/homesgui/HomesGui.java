@@ -181,7 +181,7 @@ public class HomesGui implements Listener, CommandExecutor {
         }
     }
 
-    private static final class Holder implements InventoryHolder {
+    private static final class Holder implements net.ezserver.questeconomy.util.PluginGui {
         Inventory inv;
         @Override public @NotNull Inventory getInventory() { return inv; }
     }

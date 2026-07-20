@@ -1,5 +1,5 @@
 name: QuestEconomy
-version: 1.6.1
+version: 1.7.0
 main: net.ezserver.questeconomy.QuestEconomy
 # If the server log ever complains about api-version, set this to the value it suggests.
 api-version: '1.21'

@@ -141,7 +141,7 @@ public class QuestHandler implements Listener, CommandExecutor {
 
     // ================= GUI =================
 
-    private static final class QuestHolder implements InventoryHolder {
+    private static final class QuestHolder implements net.ezserver.questeconomy.util.PluginGui {
         Inventory inv;
         @Override public @NotNull Inventory getInventory() { return inv; }
     }
