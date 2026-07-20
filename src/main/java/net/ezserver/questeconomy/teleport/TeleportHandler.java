@@ -112,6 +112,32 @@ public class TeleportHandler implements Listener, CommandExecutor {
         return cfg.getInt("teleport.home.cap-cost", 4);
     }
 
+    /** Public cost lookup so other menus (like the homes GUI) can show the price. */
+    public int homeTeleportCost(Location from, Location to) {
+        return homeCost(from, to);
+    }
+
+    /** Request a paid teleport to a destination (used by the homes GUI click). Reuses the confirm flow. */
+    public void requestPaidTeleport(Player p, Location dest, int cost, String label) {
+        if (cost <= 0) { p.teleport(dest); return; }
+        if (!plugin.coins().has(p, cost)) {
+            plugin.msg().send(p, "tp-need-coins", "cost", String.valueOf(cost));
+            return;
+        }
+        if (!plugin.getConfig().getBoolean("teleport.confirm", true)) {
+            plugin.coins().pay(p, cost);
+            bypass.add(p.getUniqueId());
+            p.teleport(dest);
+            plugin.msg().send(p, "tp-paid", "cost", String.valueOf(cost));
+            return;
+        }
+        pending.put(p.getUniqueId(), new Pending(dest.clone(), cost, label));
+        p.sendMessage(MM.deserialize("<gold>[Quests]</gold> <gray>Teleport to <white>" + label
+                + "</white> for <yellow>" + cost + " Copper Coins</yellow>? "
+                + "<click:run_command:'/qetp'><green><bold>[Confirm]</bold></green></click> "
+                + "<click:run_command:'/qetpcancel'><red>[Cancel]</red></click>"));
+    }
+
     // 3) Confirm / cancel commands (run by the clickable message).
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {

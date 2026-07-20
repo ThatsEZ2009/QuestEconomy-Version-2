@@ -1,4 +1,4 @@
-QuestEconomy v1.3.0 — FULL project (Pass 1 + 2 + 3).
-Everything at top level: pom.xml, src, resourcepack, .github
-Extract this into your local repo folder (C:\QuestEconomy), choose Replace All,
-then in GitHub Desktop: Commit -> Push. Build -> download QuestEconomy-1.3.0.jar.
+QuestEconomy v1.4.0 — adds the native Homes GUI (with per-home coin costs) + the v1.3.1 Mint/wording fixes.
+Extract, copy contents into your Version-2 repo clone (Replace All), GitHub Desktop Commit -> Push.
+This build adds the HuskHomes API dependency. If the build goes RED on the dependency or on
+'net.william278' imports, paste the error - it's a one-line version/import fix.

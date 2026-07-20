@@ -6,6 +6,7 @@ import net.ezserver.questeconomy.coin.CoinService;
 import net.ezserver.questeconomy.coin.CoinType;
 import net.ezserver.questeconomy.command.AdminCommand;
 import net.ezserver.questeconomy.homes.HomeService;
+import net.ezserver.questeconomy.homesgui.HomesGui;
 import net.ezserver.questeconomy.mint.MintHandler;
 import net.ezserver.questeconomy.quest.QuestHandler;
 import net.ezserver.questeconomy.quest.QuestManager;
@@ -63,6 +64,17 @@ public final class QuestEconomy extends JavaPlugin {
         PluginCommand buyhome = getCommand("buyhome");
         if (buyhome != null) buyhome.setExecutor(homeService);
 
+        // Homes GUI with per-home costs (only if HuskHomes is installed)
+        if (getServer().getPluginManager().getPlugin("HuskHomes") != null) {
+            HomesGui homesGui = new HomesGui(this, teleportHandler);
+            if (homesGui.setup()) {
+                getServer().getPluginManager().registerEvents(homesGui, this);
+                PluginCommand homes = getCommand("homes");
+                if (homes != null) homes.setExecutor(homesGui);
+                getLogger().info("Hooked HuskHomes for the homes GUI.");
+            }
+        }
+
         PluginCommand cmd = getCommand("qadmin");
         if (cmd != null) {
             AdminCommand ac = new AdminCommand(this);
@@ -70,7 +82,7 @@ public final class QuestEconomy extends JavaPlugin {
             cmd.setTabCompleter(ac);
         }
 
-        getLogger().info("QuestEconomy enabled (Pass 3: coins + quests + mint + teleport costs).");
+        getLogger().info("QuestEconomy enabled (Pass 4: coins + quests + mint + teleport + homes GUI).");
     }
 
     @Override
