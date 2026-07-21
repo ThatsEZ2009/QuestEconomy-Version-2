@@ -55,7 +55,9 @@ public class QuestManager {
 
     static final class PlayerData {
         List<ActiveQuest> quests = new ArrayList<>();
-        long refresh; // epoch millis when quests should regenerate
+        long refresh;       // epoch millis when quests should regenerate
+        int totalCompleted; // lifetime quests finished (for the leaderboard)
+        String name = "";   // last known username, so the leaderboard can show it
     }
 
     // ---------- fields ----------
@@ -163,6 +165,8 @@ public class QuestManager {
                     UUID id = UUID.fromString(key);
                     PlayerData pd = new PlayerData();
                     pd.refresh = ps.getLong(key + ".refresh", 0L);
+                    pd.totalCompleted = ps.getInt(key + ".total", 0);
+                    pd.name = ps.getString(key + ".name", "");
                     ConfigurationSection qs = ps.getConfigurationSection(key + ".quests");
                     if (qs != null) {
                         for (String slot : qs.getKeys(false)) {
@@ -187,6 +191,8 @@ public class QuestManager {
         for (Map.Entry<UUID, PlayerData> e : players.entrySet()) {
             String base = "players." + e.getKey();
             data.set(base + ".refresh", e.getValue().refresh);
+            data.set(base + ".total", e.getValue().totalCompleted);
+            data.set(base + ".name", e.getValue().name);
             int i = 0;
             for (ActiveQuest aq : e.getValue().quests) {
                 String qb = base + ".quests." + i++;
@@ -291,11 +297,45 @@ public class QuestManager {
 
     private void complete(Player p, ActiveQuest aq) {
         aq.completed = true;
+        PlayerData pd = players.get(p.getUniqueId());
+        if (pd != null) {
+            pd.totalCompleted++;
+            pd.name = p.getName();
+        }
         int coins = reward.getOrDefault(aq.def.tier, 1);
         plugin.coins().giveType(p, CoinType.COPPER, coins); // quests pay Copper only
         p.sendMessage(net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(
                 "<gold>[Quests]</gold> <green>Completed: <white>" + aq.def.display() + "</white> — earned <#e0913a>" + coins + " Copper</#e0913a>!"));
         p.playSound(p.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, 1f, 1.4f);
+    }
+
+    // ---------- stats / admin ----------
+
+    /** Lifetime quests completed by a player. */
+    public int totalCompleted(UUID id) {
+        PlayerData pd = players.get(id);
+        return pd == null ? 0 : pd.totalCompleted;
+    }
+
+    /** Top questers (name -> total), highest first. */
+    public List<Map.Entry<String, Integer>> topQuesters(int limit) {
+        List<Map.Entry<String, Integer>> out = new ArrayList<>();
+        for (PlayerData pd : players.values()) {
+            if (pd.totalCompleted <= 0) continue;
+            String n = (pd.name == null || pd.name.isEmpty()) ? "Unknown" : pd.name;
+            out.add(new AbstractMap.SimpleEntry<>(n, pd.totalCompleted));
+        }
+        out.sort((a, b) -> Integer.compare(b.getValue(), a.getValue()));
+        return out.size() > limit ? new ArrayList<>(out.subList(0, limit)) : out;
+    }
+
+    /** Wipe a player's active quests so they get a fresh set. Keeps their lifetime total. */
+    public void resetQuests(UUID id) {
+        PlayerData pd = players.get(id);
+        if (pd == null) return;
+        pd.quests.clear();
+        pd.refresh = 0L;
+        save();
     }
 
     // ---------- quest boards ----------

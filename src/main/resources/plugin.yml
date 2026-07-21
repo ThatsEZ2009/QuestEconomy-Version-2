@@ -1,5 +1,5 @@
 name: QuestEconomy
-version: 1.7.0
+version: 1.8.0
 main: net.ezserver.questeconomy.QuestEconomy
 # If the server log ever complains about api-version, set this to the value it suggests.
 api-version: '1.21'
@@ -15,7 +15,7 @@ commands:
     aliases: [qe]
   quests:
     description: Open your daily quests.
-    usage: /quests
+    usage: /quests [top]
     aliases: [quest, q]
   mint:
     description: Open the Coin Mint.

@@ -22,6 +22,7 @@ public final class QuestEconomy extends JavaPlugin {
     private Messages messages;
     private QuestManager questManager;
     private HomeService homeService;
+    private HomesGui homesGui;
 
     @Override
     public void onEnable() {
@@ -66,12 +67,14 @@ public final class QuestEconomy extends JavaPlugin {
 
         // Homes GUI with per-home costs (only if HuskHomes is installed)
         if (getServer().getPluginManager().getPlugin("HuskHomes") != null) {
-            HomesGui homesGui = new HomesGui(this, teleportHandler, homeService);
+            this.homesGui = new HomesGui(this, teleportHandler, homeService);
             if (homesGui.setup()) {
                 getServer().getPluginManager().registerEvents(homesGui, this);
                 PluginCommand homes = getCommand("homes");
                 if (homes != null) homes.setExecutor(homesGui);
                 getLogger().info("Hooked HuskHomes for the homes GUI.");
+            } else {
+                this.homesGui = null;
             }
         }
 
@@ -92,6 +95,7 @@ public final class QuestEconomy extends JavaPlugin {
     }
 
     public HomeService homes() { return homeService; }
+    public HomesGui homesGui() { return homesGui; }
 
     // Coin value / model-data resolution (config overrides the enum defaults).
     public int valueOf(CoinType t) {

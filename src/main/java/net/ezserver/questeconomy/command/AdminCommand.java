@@ -20,7 +20,7 @@ import java.util.List;
 public class AdminCommand implements CommandExecutor, TabCompleter {
 
     // Bump this every time a new build is shipped, so /qadmin version confirms what's running.
-    public static final String BUILD = "Pass 7 — build 11 (chest-safe coins + no-vault at plots)";
+    public static final String BUILD = "Pass 8 — build 12 (leaderboard + admin home viewer)";
 
     private final QuestEconomy plugin;
 
@@ -74,6 +74,23 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
                     else plugin.msg().send(p, "not-a-mint");
                 }
             }
+            case "resetquests" -> {
+                if (args.length < 2) { sender.sendMessage("§c/qadmin resetquests <player>"); return true; }
+                var target = Bukkit.getOfflinePlayer(args[1]);
+                plugin.quests().resetQuests(target.getUniqueId());
+                sender.sendMessage("§aReset quests for §f" + args[1] + "§a - they'll get a fresh set on their next board open.");
+            }
+            case "homes" -> {
+                if (!(sender instanceof Player p)) { plugin.msg().send(sender, "players-only"); return true; }
+                if (args.length < 2) { p.sendMessage("§c/qadmin homes <player>"); return true; }
+                if (plugin.homesGui() == null) {
+                    p.sendMessage("§cHuskHomes isn't hooked, so homes can't be viewed.");
+                    return true;
+                }
+                var target = Bukkit.getOfflinePlayer(args[1]);
+                String tName = target.getName() != null ? target.getName() : args[1];
+                plugin.homesGui().openForTarget(p, target.getUniqueId(), tName);
+            }
             case "givecoins" -> {
                 if (args.length < 4) {
                     plugin.msg().send(sender, "usage-givecoins");
@@ -114,7 +131,13 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
-        if (args.length == 1) return filter(Arrays.asList("givecoins", "setboard", "removeboard", "setmint", "removemint", "reload", "version"), args[0]);
+        if (args.length == 1) return filter(Arrays.asList("givecoins", "setboard", "removeboard", "setmint", "removemint",
+                "homes", "resetquests", "reload", "version"), args[0]);
+        if (args.length == 2 && (args[0].equalsIgnoreCase("homes") || args[0].equalsIgnoreCase("resetquests"))) {
+            List<String> names = new ArrayList<>();
+            for (Player pl : Bukkit.getOnlinePlayers()) names.add(pl.getName());
+            return filter(names, args[1]);
+        }
         if (args.length == 2 && args[0].equalsIgnoreCase("givecoins")) {
             List<String> names = new ArrayList<>();
             for (Player p : Bukkit.getOnlinePlayers()) names.add(p.getName());

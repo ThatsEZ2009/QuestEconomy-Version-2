@@ -135,8 +135,30 @@ public class QuestHandler implements Listener, CommandExecutor {
             plugin.msg().send(sender, "players-only");
             return true;
         }
+        if (args.length >= 1 && args[0].equalsIgnoreCase("top")) {
+            showLeaderboard(p);
+            return true;
+        }
         openGui(p);
         return true;
+    }
+
+    /** /quests top - public leaderboard of lifetime quests completed. */
+    private void showLeaderboard(Player p) {
+        List<java.util.Map.Entry<String, Integer>> top = qm.topQuesters(10);
+        p.sendMessage(MM.deserialize("<gold><bold>Top Questers</bold></gold>"));
+        if (top.isEmpty()) {
+            p.sendMessage(MM.deserialize("<gray>Nobody has finished a quest yet."));
+        } else {
+            int rank = 1;
+            for (java.util.Map.Entry<String, Integer> e : top) {
+                String colour = rank == 1 ? "<gold>" : rank == 2 ? "<white>" : rank == 3 ? "<#cd7f32>" : "<gray>";
+                p.sendMessage(MM.deserialize(colour + rank + ".</white> <white>" + e.getKey()
+                        + "</white> <dark_gray>-</dark_gray> <aqua>" + e.getValue() + "</aqua> <gray>quests"));
+                rank++;
+            }
+        }
+        p.sendMessage(MM.deserialize("<dark_gray>You: <aqua>" + qm.totalCompleted(p.getUniqueId()) + "</aqua> <gray>completed."));
     }
 
     // ================= GUI =================

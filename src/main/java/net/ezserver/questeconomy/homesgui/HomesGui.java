@@ -9,6 +9,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.william278.huskhomes.api.HuskHomesAPI;
 import net.william278.huskhomes.position.Home;
 import net.william278.huskhomes.user.OnlineUser;
+import net.william278.huskhomes.user.User;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -29,8 +30,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /** Homes menu: 10 slots showing owned homes (teleport cost) and buyable slots (unlock price). */
@@ -46,6 +49,8 @@ public class HomesGui implements Listener, CommandExecutor {
     private final HomeService homeService;
     private HuskHomesAPI api;
     private final Map<UUID, Slot[]> viewing = new HashMap<>();
+    /** Players currently looking at someone else's homes (admin view) - no spawn/rtp/buy buttons. */
+    private final Set<UUID> adminView = new HashSet<>();
 
     private enum Kind { HOME, BUY, NONE }
     private record Slot(Kind kind, Location loc, int cost) {}
@@ -90,9 +95,51 @@ public class HomesGui implements Listener, CommandExecutor {
 
     private void openFor(Player p) {
         if (api == null) { p.sendMessage(MM.deserialize("<red>Homes are unavailable right now.")); return; }
+        adminView.remove(p.getUniqueId());
         OnlineUser user = api.adaptUser(p);
         api.getUserHomes(user).thenAccept(homes ->
                 Bukkit.getScheduler().runTask(plugin, () -> build(p, homes)));
+    }
+
+    /** Admin view: browse another player's homes. Teleports are free and there's no buying. */
+    public void openForTarget(Player viewer, UUID targetId, String targetName) {
+        if (api == null) { viewer.sendMessage(MM.deserialize("<red>Homes are unavailable right now.")); return; }
+        adminView.add(viewer.getUniqueId());
+        User target = User.of(targetId, targetName);
+        api.getUserHomes(target).thenAccept(homes ->
+                Bukkit.getScheduler().runTask(plugin, () -> buildAdmin(viewer, homes, targetName)));
+    }
+
+    private void buildAdmin(Player viewer, List<Home> homes, String targetName) {
+        Slot[] slots = new Slot[SLOTS.length];
+        Holder holder = new Holder();
+        Inventory inv = Bukkit.createInventory(holder, 27, MM.deserialize("<dark_aqua>" + targetName + "'s Homes"));
+        holder.inv = inv;
+
+        ItemStack filler = named(Material.GRAY_STAINED_GLASS_PANE, " ", List.of());
+        for (int i = 0; i < 27; i++) inv.setItem(i, filler);
+
+        inv.setItem(4, named(Material.ENDER_PEARL, "<dark_aqua>" + targetName + "'s Homes",
+                List.of("<gray>Homes set: <white>" + homes.size() + "</white>",
+                        "<yellow>Click one to teleport there (free)")));
+
+        for (int i = 0; i < SLOTS.length; i++) {
+            if (i < homes.size()) {
+                Home h = homes.get(i);
+                World w = Bukkit.getWorld(h.getWorld().getName());
+                if (w == null) { slots[i] = new Slot(Kind.NONE, null, 0); continue; }
+                Location loc = new Location(w, h.getX(), h.getY(), h.getZ());
+                inv.setItem(SLOTS[i], named(Material.RED_BED, "<aqua>" + h.getName(),
+                        List.of("<gray>" + w.getName() + "  <white>"
+                                        + (int) h.getX() + ", " + (int) h.getY() + ", " + (int) h.getZ(),
+                                "<yellow>Click to teleport (free)")));
+                slots[i] = new Slot(Kind.HOME, loc, 0); // cost 0 = free for admins
+            } else {
+                slots[i] = new Slot(Kind.NONE, null, 0);
+            }
+        }
+        viewing.put(viewer.getUniqueId(), slots);
+        viewer.openInventory(inv);
     }
 
     private void build(Player p, List<Home> homes) {
@@ -160,8 +207,11 @@ public class HomesGui implements Listener, CommandExecutor {
         e.setCancelled(true);
         if (!(e.getWhoClicked() instanceof Player p)) return;
         int raw = e.getRawSlot();
-        if (raw == SPAWN_SLOT) { p.closeInventory(); p.performCommand("spawn"); return; }
-        if (raw == RTP_SLOT)   { p.closeInventory(); p.performCommand("rtp"); return; }
+        boolean admin = adminView.contains(p.getUniqueId());
+        if (!admin) {
+            if (raw == SPAWN_SLOT) { p.closeInventory(); p.performCommand("spawn"); return; }
+            if (raw == RTP_SLOT)   { p.closeInventory(); p.performCommand("rtp"); return; }
+        }
 
         Slot[] slots = viewing.get(p.getUniqueId());
         if (slots == null) return;
