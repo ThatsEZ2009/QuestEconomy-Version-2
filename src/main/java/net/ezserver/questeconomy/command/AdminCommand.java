@@ -48,6 +48,7 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
                 plugin.reloadConfig();
                 plugin.msg().reload();
                 plugin.quests().load();
+                if (plugin.boardDisplay() != null) plugin.boardDisplay().refresh();
                 plugin.msg().send(sender, "reloaded");
             }
             case "setboard", "removeboard" -> {
@@ -61,6 +62,8 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
                     if (plugin.quests().removeBoard(b.getLocation())) plugin.msg().send(p, "board-removed");
                     else plugin.msg().send(p, "not-a-board");
                 }
+                // rebuild the single clean label (and clean up any garbled leftovers)
+                if (plugin.boardDisplay() != null) plugin.boardDisplay().refresh();
             }
             case "setmint", "removemint" -> {
                 if (!(sender instanceof Player p)) { plugin.msg().send(sender, "players-only"); return true; }

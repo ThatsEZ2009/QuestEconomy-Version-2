@@ -345,6 +345,9 @@ public class QuestManager {
 
     public boolean isBoard(Location l) { return boards.contains(key(l)); }
 
+    /** All board block keys ("world,x,y,z"), for the floating-label renderer. */
+    public Set<String> boardKeys() { return new HashSet<>(boards); }
+
     public boolean addBoard(Location l) {
         boolean added = boards.add(key(l));
         if (added) save();

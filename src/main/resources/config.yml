@@ -53,3 +53,12 @@ homes:
   prices: [5, 10, 17, 20, 35]   # cost of the 3rd, 4th, 5th, 6th, 7th home
   price-after: 20               # cost of each home beyond the list
   # NOTE: set HuskHomes' own max_homes to 2 (or your 'free' value) so purchases add on top.
+
+# ---------------- Quest Board floating label ----------------
+# One clean label is shown above each quest board, however many blocks it is made of.
+# (Adjacent board blocks are grouped so multi-block boards get a SINGLE centred label,
+#  instead of one per block overlapping into garbled text.)
+board:
+  label-enabled: true
+  label: "<dark_aqua>Daily Quests"   # MiniMessage formatting
+  label-y-offset: 1.4                # how far above the top board block the text floats

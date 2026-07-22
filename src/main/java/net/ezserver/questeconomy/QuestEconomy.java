@@ -8,6 +8,7 @@ import net.ezserver.questeconomy.command.AdminCommand;
 import net.ezserver.questeconomy.homes.HomeService;
 import net.ezserver.questeconomy.homesgui.HomesGui;
 import net.ezserver.questeconomy.mint.MintHandler;
+import net.ezserver.questeconomy.quest.BoardDisplay;
 import net.ezserver.questeconomy.quest.QuestHandler;
 import net.ezserver.questeconomy.quest.QuestManager;
 import net.ezserver.questeconomy.teleport.TeleportHandler;
@@ -21,6 +22,7 @@ public final class QuestEconomy extends JavaPlugin {
     private CoinService coinService;
     private Messages messages;
     private QuestManager questManager;
+    private BoardDisplay boardDisplay;
     private HomeService homeService;
     private HomesGui homesGui;
 
@@ -43,6 +45,11 @@ public final class QuestEconomy extends JavaPlugin {
 
         // Autosave quest progress every 3 minutes (hot paths only touch memory).
         getServer().getScheduler().runTaskTimer(this, questManager::save, 20L * 60 * 3, 20L * 60 * 3);
+
+        // One clean floating label per quest board (+ cleanup of stale/garbled leftovers).
+        // Delayed so the board's chunks are loaded before we try to spawn/clean displays.
+        this.boardDisplay = new BoardDisplay(this, questManager);
+        getServer().getScheduler().runTaskLater(this, boardDisplay::refresh, 60L);
 
         // Coin Mint
         MintHandler mintHandler = new MintHandler(this);
@@ -91,8 +98,11 @@ public final class QuestEconomy extends JavaPlugin {
     @Override
     public void onDisable() {
         if (questManager != null) questManager.save();
+        if (boardDisplay != null) boardDisplay.removeAll();
         if (homeService != null) homeService.save();
     }
+
+    public BoardDisplay boardDisplay() { return boardDisplay; }
 
     public HomeService homes() { return homeService; }
     public HomesGui homesGui() { return homesGui; }
